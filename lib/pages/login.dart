@@ -5,6 +5,9 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatefulWidget {
+
+  final String URL = "http://212.24.148.132/Test_Asistentka/MobileApp/";
+
   @override
   State<StatefulWidget> createState() {
     return _LoginPageState();
@@ -138,7 +141,7 @@ class _LoginPageState extends State<LoginPage> {
 
   sendSMS() async {
     http.Response response = await http.get(
-        "https://testasistentka.azurewebsites.net/MobileApp/NewSession?mailAddress=" +
+        widget.URL + "NewSession?mailAddress=" +
             email);
 
     setState(() {
@@ -148,7 +151,7 @@ class _LoginPageState extends State<LoginPage> {
 
   getSessionID() async {
     http.Response response = await http.get(
-        "https://testasistentka.azurewebsites.net/MobileApp/ValidateSession?initialCode=" +
+        widget.URL + "ValidateSession?initialCode=" +
             initialID);
 
     Map<String, dynamic> r = jsonDecode(response.body);

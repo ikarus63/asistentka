@@ -8,6 +8,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io';
 
 class VykazyPage extends StatefulWidget {
+
+  final String URL = "http://212.24.148.132/Test_Asistentka/MobileApp/";
+
   @override
   State<StatefulWidget> createState() {
     return _VykazyPageState();
@@ -135,14 +138,14 @@ class _VykazyPageState extends State<VykazyPage> {
 
     //stažení dat - tento měsíc
     http.Response response = await http.get(
-        "https://testasistentka.azurewebsites.net/MobileApp/Dashboard/" +
+        widget.URL + "Dashboard/" +
             sessionID +
             "/History?" +
             period);
 
     //stažení dat - předchozí měsíc
     http.Response responsePrevious = await http.get(
-        "https://testasistentka.azurewebsites.net/MobileApp/Dashboard/" +
+        widget.URL + "Dashboard/" +
             sessionID +
             "/History?" +
             periodPrevious);

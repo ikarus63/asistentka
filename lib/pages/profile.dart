@@ -9,6 +9,8 @@ import 'dart:io';
 
 class ProfilePage extends StatefulWidget {
 
+  final String URL = "http://212.24.148.132/Test_Asistentka/MobileApp/";
+
   @override
   State<StatefulWidget> createState() {
     return _ProfilePageState();
@@ -175,7 +177,7 @@ class _ProfilePageState extends State<ProfilePage> {
     }
 
     http.Response response = await http.get(
-        "https://testasistentka.azurewebsites.net/MobileApp/Dashboard/" +
+        widget.URL + "Dashboard/" +
             sessionID);
 
     Map<String, dynamic> d = jsonDecode(response.body);
