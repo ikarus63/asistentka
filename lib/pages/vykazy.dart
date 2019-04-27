@@ -8,9 +8,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io';
 
 class VykazyPage extends StatefulWidget {
-
   final String URL = "http://212.24.148.132/Test_Asistentka/MobileApp/";
- 
+
   @override
   State<StatefulWidget> createState() {
     return _VykazyPageState();
@@ -42,7 +41,33 @@ class _VykazyPageState extends State<VykazyPage> {
           child: ListView(
             children: <Widget>[
               SizedBox(
-                height: 3.0,
+                height: 8.0,
+              ),
+              Container(
+                margin: EdgeInsets.symmetric(horizontal: 10.0),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton(
+                    value: showPreviousJobs ? 'Minulý měsíc' : 'Tento měsíc',
+                    items: <String>['Tento měsíc', 'Minulý měsíc']
+                        .map((String value) {
+                      return new DropdownMenuItem<String>(
+                        value: value,
+                        child: new Text(value),
+                      );
+                    }).toList(),
+                    onChanged: (a) {
+                      if (a == 'Tento měsíc') {
+                        showPreviousJobs = false;
+                      } else {
+                        showPreviousJobs = true;
+                      }
+                      setState(() {});
+                    },
+                  ),
+                ),
+              ),
+              SizedBox(
+                height: 8.0,
               ),
             ]..addAll(getJobs()),
           ),
@@ -52,65 +77,85 @@ class _VykazyPageState extends State<VykazyPage> {
   }
 
   getJobs() {
-    var data;
-    data = <Widget>[Container()];
+    List<Job> thisJobs;
 
-    for (int i = 0; i < jobs.length; i++) {
-      Job c = jobs[i];
+    if (showPreviousJobs) {
+      thisJobs = jobsPrevious;
+    } else {
+      thisJobs = jobs;
+    }
+
+    var data;
+
+    if (thisJobs.isNotEmpty) {
+      data = <Widget>[Container()];
+
+      for (int i = 0; i < thisJobs.length; i++) {
+        Job c = thisJobs[i];
+
+        data = data
+          ..addAll(<Widget>[
+            Card(
+              child: Column(
+                children: <Widget>[
+                  SizedBox(
+                    height: 7.0,
+                  ),
+                  Text(
+                    c.type,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 17.0,
+                    ),
+                  ),
+                  SizedBox(
+                    height: 5.0,
+                  ),
+                  Text(
+                    c.date,
+                    style: TextStyle(
+                      fontSize: 10.0,
+                      color: Colors.blueGrey,
+                    ),
+                  ),
+                  SizedBox(
+                    height: 5.0,
+                  ),
+                  Text(
+                    c.description,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 15.0,
+                    ),
+                  ),
+                  SizedBox(
+                    height: 7.0,
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(
+              height: 7.0,
+            ),
+          ]);
+      }
 
       data = data
         ..addAll(<Widget>[
-          Card(
-            child: Column(
-              children: <Widget>[
-                SizedBox(
-                  height: 7.0,
-                ),
-                Text(
-                  c.type,
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 17.0,
-                  ),
-                ),
-                SizedBox(
-                  height: 5.0,
-                ),
-                Text(
-                  c.date,
-                  style: TextStyle(
-                    fontSize: 10.0,
-                    color: Colors.blueGrey,
-                  ),
-                ),
-                SizedBox(
-                  height: 5.0,
-                ),
-                Text(
-                  c.description,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 15.0,
-                  ),
-                ),
-                SizedBox(
-                  height: 7.0,
-                ),
-              ],
-            ),
-          ),
           SizedBox(
-            height: 7.0,
+            height: 10.0,
           ),
         ]);
-    }
-
-    data = data
-      ..addAll(<Widget>[
+    } else {
+      data = <Widget>[
         SizedBox(
-          height: 10.0,
+          height: 50.0,
         ),
-      ]);
+        Center(
+          child: Text("Žádné záznamy "),
+        )
+      ];
+    }
 
     return data;
   }
@@ -137,18 +182,12 @@ class _VykazyPageState extends State<VykazyPage> {
     String periodPrevious = _getPreviousMonthString();
 
     //stažení dat - tento měsíc
-    http.Response response = await http.get(
-        widget.URL + "Dashboard/" +
-            sessionID +
-            "/History?" +
-            period);
+    http.Response response = await http
+        .get(widget.URL + "Dashboard/" + sessionID + "/History?" + period);
 
     //stažení dat - předchozí měsíc
     http.Response responsePrevious = await http.get(
-        widget.URL + "Dashboard/" +
-            sessionID +
-            "/History?" +
-            periodPrevious);
+        widget.URL + "Dashboard/" + sessionID + "/History?" + periodPrevious);
 
     //zpracování dat - tento měsíc
     Map<String, dynamic> data = jsonDecode(response.body);
@@ -190,7 +229,7 @@ class _VykazyPageState extends State<VykazyPage> {
     setState(() {});
   }
 
-  String _getThisMonthString(){
+  String _getThisMonthString() {
     //FORMÁT
     //2019-03-01
 
@@ -201,14 +240,17 @@ class _VykazyPageState extends State<VykazyPage> {
     int year = now.year;
     int month = now.month;
 
-    String monthString = month < 10 ? ("0" + month.toString()) : month.toString();
+    String monthString =
+        month < 10 ? ("0" + month.toString()) : month.toString();
 
     //FROM
     from = year.toString() + "-" + monthString + "-01";
 
     //TO
     var lastDate = new DateTime(year, month + 1, 0);
-    String lastDayString = lastDate.day < 10 ? "0" + lastDate.day.toString() : lastDate.day.toString();
+    String lastDayString = lastDate.day < 10
+        ? "0" + lastDate.day.toString()
+        : lastDate.day.toString();
     to = year.toString() + "-" + monthString + "-" + lastDayString;
 
     print("THIS MONTH: " + from + " => " + to);
@@ -219,7 +261,7 @@ class _VykazyPageState extends State<VykazyPage> {
     return from + "&" + to;
   }
 
-  String _getPreviousMonthString(){
+  String _getPreviousMonthString() {
     //FORMÁT
     //2019-03-01
 
@@ -230,7 +272,7 @@ class _VykazyPageState extends State<VykazyPage> {
     int year = now.year;
     int month = now.month;
 
-    if(month == 1){
+    if (month == 1) {
       year = year - 1;
 
       //FROM
@@ -238,16 +280,19 @@ class _VykazyPageState extends State<VykazyPage> {
 
       //TO
       to = year.toString() + "-12-31";
-    }else{
+    } else {
       month = month - 1;
-      String monthString = month < 10 ? ("0" + month.toString()) : month.toString();
+      String monthString =
+          month < 10 ? ("0" + month.toString()) : month.toString();
 
       //FROM
       from = year.toString() + "-" + monthString + "-01";
 
       //TO
       var lastDate = new DateTime(year, month + 1, 0);
-      String lastDayString = lastDate.day < 10 ? "0" + lastDate.day.toString() : lastDate.day.toString();
+      String lastDayString = lastDate.day < 10
+          ? "0" + lastDate.day.toString()
+          : lastDate.day.toString();
       to = year.toString() + "-" + monthString + "-" + lastDayString;
     }
 
